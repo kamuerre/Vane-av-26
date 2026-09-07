@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Clínica del Feedback — Tarjeta SBI</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#F0F2F5;min-height:100vh;padding:16px}
+  .container{max-width:520px;margin:0 auto}
+
+  .header{background:#1C2B3A;border-radius:14px;padding:20px 22px 16px;margin-bottom:14px;text-align:center}
+  .header h1{color:#E8574A;font-size:20px;font-weight:700;letter-spacing:.3px;margin-bottom:4px}
+  .header p{color:#9AA5B4;font-size:12px}
+
+  /* Selector de tipo */
+  .tipo-selector{display:flex;gap:8px;margin-bottom:14px}
+  .tipo-btn{flex:1;padding:12px 8px;border-radius:10px;border:2px solid transparent;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;text-align:center}
+  .tipo-btn.fortaleza{background:#F0FFF8;color:#2E9E6B;border-color:#2E9E6B}
+  .tipo-btn.oportunidad{background:#FFF9F0;color:#D4900A;border-color:#D4900A}
+  .tipo-btn.active.fortaleza{background:#2E9E6B;color:#fff}
+  .tipo-btn.active.oportunidad{background:#D4900A;color:#fff}
+  .tipo-btn:hover{opacity:.85}
+
+  /* Card */
+  .card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:14px}
+  .card-header{padding:14px 18px 12px;display:flex;align-items:center;gap:10px}
+  .card-header.fortaleza{background:#F0FFF8;border-bottom:2px solid #2E9E6B}
+  .card-header.oportunidad{background:#FFF9F0;border-bottom:2px solid #D4900A}
+  .card-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+  .card-icon.fortaleza{background:#2E9E6B}
+  .card-icon.oportunidad{background:#D4900A}
+  .card-header-text h2{font-size:14px;font-weight:700;margin-bottom:2px}
+  .card-header-text h2.fortaleza{color:#2E9E6B}
+  .card-header-text h2.oportunidad{color:#D4900A}
+  .card-header-text p{font-size:11px;color:#9AA5B4}
+
+  /* Bloques SBI */
+  .sbi-block{padding:14px 18px;border-bottom:1px solid #F0F2F5}
+  .sbi-block:last-child{border-bottom:none}
+  .sbi-label{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .sbi-letra{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+  .sbi-letra.s{background:#2D6FA4}
+  .sbi-letra.b-f{background:#2E9E6B}
+  .sbi-letra.b-o{background:#D4900A}
+  .sbi-letra.i-f{background:#2E9E6B}
+  .sbi-letra.i-o{background:#E8574A}
+  .sbi-label-text{font-size:12px;font-weight:700;color:#1C2B3A}
+  .sbi-hint{font-size:11px;color:#9AA5B4;margin-bottom:8px;font-style:italic;padding-left:34px}
+  textarea{width:100%;border:1.5px solid #E2E5EA;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:#1C2B3A;resize:vertical;min-height:56px;line-height:1.5;transition:border-color .2s;background:#FAFBFC}
+  textarea:focus{outline:none;border-color:#2D6FA4;background:#fff}
+  textarea.fortaleza:focus{border-color:#2E9E6B}
+  textarea.oportunidad:focus{border-color:#D4900A}
+  textarea::placeholder{color:#C5CAD4}
+
+  /* Cierre */
+  .cierre-block{padding:14px 18px;background:#F5F6F8;border-top:2px dashed #E2E5EA}
+  .cierre-label{font-size:11px;font-weight:700;color:#4A5568;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+  .cierre-hint{font-size:11px;color:#9AA5B4;margin-bottom:8px;font-style:italic}
+
+  /* Para quién */
+  .para-block{background:#fff;border-radius:14px;padding:14px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+  .para-block label{font-size:12px;font-weight:700;color:#1C2B3A;display:block;margin-bottom:6px}
+  input[type=text]{width:100%;border:1.5px solid #E2E5EA;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:#1C2B3A;background:#FAFBFC;transition:border-color .2px}
+  input[type=text]:focus{outline:none;border-color:#2D6FA4;background:#fff}
+  input[type=text]::placeholder{color:#C5CAD4}
+
+  /* Botones */
+  .botones{display:flex;gap:8px;margin-bottom:20px}
+  .btn{flex:1;padding:13px 10px;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+  .btn-copy{background:#1C2B3A;color:#fff}
+  .btn-copy:hover{background:#2D4459}
+  .btn-clear{background:#F5F6F8;color:#4A5568;border:1.5px solid #E2E5EA}
+  .btn-clear:hover{background:#E2E5EA}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#1C2B3A;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* Preview */
+  .preview{background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);display:none}
+  .preview.visible{display:block}
+  .preview-title{font-size:11px;font-weight:700;color:#9AA5B4;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+  .preview-content{font-size:13px;color:#1C2B3A;line-height:1.7;white-space:pre-wrap;background:#F5F6F8;border-radius:8px;padding:12px 14px}
+
+  .footer{text-align:center;color:#9AA5B4;font-size:11px;margin-bottom:8px}
+  .tipo-hidden{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>La Clínica del Feedback</h1>
+    <p>Cápsula 03 · America Virtual · Programa 10X · 2026</p>
+  </div>
+
+  <!-- Para quién -->
+  <div class="para-block">
+    <label>Esta tarjeta es para:</label>
+    <input type="text" id="para-quien" placeholder="Nombre de la persona..." maxlength="60">
+    <label style="margin-top:10px">Mi nombre:</label>
+    <input type="text" id="mi-nombre" placeholder="Tu nombre..." maxlength="60">
+  </div>
+
+  <!-- Selector tipo -->
+  <div class="tipo-selector">
+    <button class="tipo-btn fortaleza active" onclick="setTipo('fortaleza')">⭐ Fortaleza</button>
+    <button class="tipo-btn oportunidad" onclick="setTipo('oportunidad')">🔧 Oportunidad de mejora</button>
+  </div>
+
+  <!-- Card SBI Fortaleza -->
+  <div class="card" id="card-fortaleza">
+    <div class="card-header fortaleza">
+      <div class="card-icon fortaleza">⭐</div>
+      <div class="card-header-text">
+        <h2 class="fortaleza">SBI · Fortaleza — Reconocimiento</h2>
+        <p>Nombrá algo que la persona hace muy bien, con precisión y ejemplos concretos</p>
+      </div>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra s">S</div>
+        <span class="sbi-label-text">SITUACIÓN</span>
+      </div>
+      <p class="sbi-hint">¿Cuándo y dónde ocurrió? Cuanto más específica, más poderoso el feedback.</p>
+      <textarea id="s-f" class="fortaleza" placeholder='"En la presentación del viernes con el cliente Ibáñez..."' rows="2"></textarea>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra b-f">B</div>
+        <span class="sbi-label-text">COMPORTAMIENTO</span>
+      </div>
+      <p class="sbi-hint">Lo que viste o escuchaste — observable y concreto, sin interpretación.</p>
+      <textarea id="b-f" class="fortaleza" placeholder='"...respondiste con calma y con datos concretos cuando el cliente hizo una pregunta difícil..."' rows="3"></textarea>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra i-f">I</div>
+        <span class="sbi-label-text">IMPACTO</span>
+      </div>
+      <p class="sbi-hint">El efecto real que tuvo ese comportamiento — no el hipotético.</p>
+      <textarea id="i-f" class="fortaleza" placeholder='"...el cliente quedó muy satisfecho y cerró la reunión con un comentario muy favorable."' rows="2"></textarea>
+    </div>
+
+    <div class="cierre-block">
+      <div class="cierre-label">Cierre — ¿cómo terminás la conversación?</div>
+      <p class="cierre-hint">Pedido, oferta o acuerdo concreto para que siga pasando.</p>
+      <textarea id="cierre-f" class="fortaleza" placeholder='"¿Qué te ayudó a responder así? ¿Cómo logramos que esto pase más seguido?"' rows="2"></textarea>
+    </div>
+  </div>
+
+  <!-- Card SBI Oportunidad -->
+  <div class="card tipo-hidden" id="card-oportunidad">
+    <div class="card-header oportunidad">
+      <div class="card-icon oportunidad">🔧</div>
+      <div class="card-header-text">
+        <h2 class="oportunidad">SBI · Oportunidad de mejora</h2>
+        <p>Describí la acción, no a la persona. No "sos impulsivo" — "en esa reunión interrumpiste tres veces"</p>
+      </div>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra s">S</div>
+        <span class="sbi-label-text">SITUACIÓN</span>
+      </div>
+      <p class="sbi-hint">¿Cuándo y dónde? Cuanto más específica, más fácil de recibir el feedback.</p>
+      <textarea id="s-o" class="oportunidad" placeholder='"En la reunión del lunes con el equipo de proyecto..."' rows="2"></textarea>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra b-o">B</div>
+        <span class="sbi-label-text">COMPORTAMIENTO</span>
+      </div>
+      <p class="sbi-hint">Lo que viste o escuchaste — concreto y observable. La acción, no la persona.</p>
+      <textarea id="b-o" class="oportunidad" placeholder='"...interrumpiste al cliente tres veces antes de que terminara de hablar..."' rows="3"></textarea>
+    </div>
+
+    <div class="sbi-block">
+      <div class="sbi-label">
+        <div class="sbi-letra i-o">I</div>
+        <span class="sbi-label-text">IMPACTO</span>
+      </div>
+      <p class="sbi-hint">El efecto real — en el cliente, el equipo o el resultado. No el hipotético.</p>
+      <textarea id="i-o" class="oportunidad" placeholder='"...el cliente se notó incómodo y dejó de desarrollar su punto en dos ocasiones."' rows="2"></textarea>
+    </div>
+
+    <div class="cierre-block">
+      <div class="cierre-label">Cierre — ¿cómo terminás la conversación?</div>
+      <p class="cierre-hint">Pedido, oferta o acuerdo concreto para que algo cambie.</p>
+      <textarea id="cierre-o" class="oportunidad" placeholder='"¿Podemos acordar que en la próxima reunión esperamos a que termine antes de intervenir?"' rows="2"></textarea>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="preview">
+    <div class="preview-title">Vista previa — para compartir en el plenario</div>
+    <div class="preview-content" id="preview-content"></div>
+  </div>
+
+  <!-- Botones -->
+  <div class="botones">
+    <button class="btn btn-copy" onclick="generarYCopiar()">Copiar para compartir</button>
+    <button class="btn btn-clear" onclick="limpiar()">Limpiar</button>
+  </div>
+
+  <div class="footer">America Virtual · Programa 10X · Cápsula 03 · 2026</div>
+</div>
+
+<div class="toast" id="toast">¡Copiado al portapapeles!</div>
+
+<script>
+let tipoActual = 'fortaleza';
+
+function setTipo(tipo) {
+  tipoActual = tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.tipo-btn.' + tipo).classList.add('active');
+  document.getElementById('card-fortaleza').classList.toggle('tipo-hidden', tipo !== 'fortaleza');
+  document.getElementById('card-oportunidad').classList.toggle('tipo-hidden', tipo !== 'oportunidad');
+  actualizarPreview();
+}
+
+function val(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function actualizarPreview() {
+  const para = val('para-quien');
+  const yo   = val('mi-nombre');
+  const t = tipoActual;
+  const s = val('s-' + t[0]);
+  const b = val('b-' + t[0]);
+  const i = val('i-' + t[0]);
+  const c = val('cierre-' + t[0]);
+
+  if (!s && !b && !i) {
+    document.getElementById('preview').classList.remove('visible');
+    return;
+  }
+
+  const tipo = t === 'fortaleza' ? '⭐ FORTALEZA' : '🔧 OPORTUNIDAD DE MEJORA';
+  let texto = '';
+  texto += '━━━━━━━━━━━━━━━━━━━━━━\n';
+  texto += `FEEDBACK SBI · ${tipo}\n`;
+  if (para) texto += `Para: ${para}\n`;
+  if (yo)   texto += `De: ${yo}\n`;
+  texto += '━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  if (s) texto += `📍 SITUACIÓN\n${s}\n\n`;
+  if (b) texto += `👁 COMPORTAMIENTO\n${b}\n\n`;
+  if (i) texto += `💡 IMPACTO\n${i}\n\n`;
+  if (c) texto += `🤝 CIERRE\n${c}\n\n`;
+  texto += '━━━━━━━━━━━━━━━━━━━━━━\n';
+  texto += 'Cápsula 03 · America Virtual · Programa 10X';
+
+  document.getElementById('preview-content').textContent = texto;
+  document.getElementById('preview').classList.add('visible');
+}
+
+function generarYCopiar() {
+  actualizarPreview();
+  const texto = document.getElementById('preview-content').textContent;
+  if (!texto) {
+    mostrarToast('Completá al menos un campo primero');
+    return;
+  }
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(texto).then(() => mostrarToast('¡Copiado al portapapeles!'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    mostrarToast('¡Copiado al portapapeles!');
+  }
+}
+
+function limpiar() {
+  ['s-f','b-f','i-f','cierre-f','s-o','b-o','i-o','cierre-o'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('preview').classList.remove('visible');
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Actualizar preview en tiempo real
+document.querySelectorAll('textarea, input[type=text]').forEach(el => {
+  el.addEventListener('input', actualizarPreview);
+});
+</script>
+</body>
+</html>
